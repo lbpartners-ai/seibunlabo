@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>成分ラボ｜化粧品成分 1発検索</title>
+<style>
+  :root{
+    --teal:#0d9488; --teal-d:#0f766e; --mint:#ccfbf1; --bg:#f8fafc;
+    --card:#ffffff; --text:#0f172a; --sub:#64748b; --line:#e2e8f0;
+    --warn:#d97706; --danger:#dc2626; --ok:#16a34a;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;background:var(--bg);color:var(--text);font-size:16px;line-height:1.6}
+  header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:10px 14px}
+  .brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:18px;color:var(--teal-d);margin-bottom:8px}
+  .brand .flask{font-size:22px}
+  .searchbox{display:flex;gap:8px}
+  #q{flex:1;min-height:48px;border:2px solid var(--teal);border-radius:12px;padding:0 14px;font-size:16px;outline:none}
+  #q:focus{box-shadow:0 0 0 3px var(--mint)}
+  #clearBtn{min-width:48px;min-height:48px;border:none;border-radius:12px;background:var(--mint);color:var(--teal-d);font-size:18px;font-weight:700;cursor:pointer}
+  .chips{display:flex;gap:8px;overflow-x:auto;padding:10px 14px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:0 0 auto;min-height:36px;padding:6px 14px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:13px;color:var(--sub);cursor:pointer;white-space:nowrap}
+  .chip.active{background:var(--teal);color:#fff;border-color:var(--teal);font-weight:700}
+  .wrap{max-width:860px;margin:0 auto;padding:0 14px 40px}
+  .hint{color:var(--sub);font-size:13px;padding:6px 4px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;margin:14px 0;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.06)}
+  .card-head{padding:16px;cursor:pointer}
+  .cname{font-size:20px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--mint);color:var(--teal-d)}
+  .inci{font-size:13px;color:var(--sub);margin-top:2px}
+  .cats{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .cat{font-size:12px;background:#f1f5f9;color:var(--sub);border-radius:6px;padding:2px 8px}
+  .eff-quick{margin-top:10px;font-size:14px;color:var(--text)}
+  details{border-top:1px solid var(--line)}
+  summary{list-style:none;cursor:pointer;padding:14px 16px;font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px;min-height:48px}
+  summary::-webkit-details-marker{display:none}
+  summary .arrow{margin-left:auto;color:var(--sub);transition:transform .2s}
+  details[open] summary .arrow{transform:rotate(180deg)}
+  .sec-body{padding:0 16px 16px;font-size:14px}
+  .sec-body ul{padding-left:20px}
+  .sec-body li{margin-bottom:4px}
+  .meter{display:flex;gap:5px;align-items:center;margin:8px 0 6px}
+  .dot{width:22px;height:10px;border-radius:5px;background:#e2e8f0}
+  .dot.on{background:var(--teal)}
+  .dot.on.warn{background:var(--warn)}
+  .dot.on.danger{background:var(--danger)}
+  .meter-label{font-size:13px;font-weight:700;margin-left:6px}
+  .sim-row{display:flex;gap:8px;overflow-x:auto;padding:4px 0 6px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .sim-row::-webkit-scrollbar{display:none}
+  .sim-chip{flex:0 0 auto;min-height:44px;padding:9px 16px;border-radius:12px;background:var(--mint);color:var(--teal-d);font-weight:700;font-size:14px;border:none;cursor:pointer}
+  .reg-box{background:#f8fafc;border-left:4px solid var(--teal);border-radius:6px;padding:10px 12px}
+  .empty{text-align:center;color:var(--sub);padding:60px 20px}
+  .empty .big{font-size:44px;margin-bottom:12px}
+  .hist-title{font-weight:800;font-size:15px;margin:20px 0 8px;color:var(--teal-d)}
+  .web-btn{min-height:48px;padding:10px 22px;border-radius:12px;border:none;background:var(--teal);color:#fff;font-weight:700;font-size:15px;cursor:pointer;margin-top:14px}
+  .web-btn:active{background:var(--teal-d)}
+  .web-link{display:inline-block;margin-top:10px;color:var(--teal-d);font-weight:700;font-size:14px;text-decoration:none}
+  .web-badge{background:#e0e7ff;color:#3730a3}
+  .hist-row{display:flex;gap:8px;flex-wrap:wrap}
+  footer{margin-top:30px;padding:16px;background:#f1f5f9;border-radius:12px;font-size:12px;color:var(--sub);line-height:1.8}
+  .num{color:var(--teal-d);font-weight:700}
+  @media(min-width:768px){ .card-head{padding:20px} .cname{font-size:22px} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><span class="flask">🧪</span>成分ラボ <span style="font-size:11px;color:var(--sub);font-weight:500">化粧品成分を1発検索</span></div>
+  <div class="searchbox">
+    <input id="q" type="search" placeholder="成分名を入力（例：ナイアシンアミド）" autocomplete="off">
+    <button id="clearBtn" aria-label="クリア">×</button>
+  </div>
+</header>
+
+<div class="chips" id="catChips"></div>
+
+<div class="wrap">
+  <div class="hint" id="hint"></div>
+  <div id="results"></div>
+  <div id="histArea"></div>
+  <footer>
+    ⚠️ 本アプリの情報は一般的な公開情報に基づく参考データです。配合・表示・法規対応の最終判断は、必ず最新の法令（薬機法・化粧品基準等）および専門家にご確認ください。<br>
+    収録：<span class="num" id="dbCount"></span>成分（内蔵DB・オフライン可）＋ DBにない成分は「ネット検索」ボタンでWikipediaからリアルタイム取得できます。<br><span id="dbStamp" style="color:var(--teal-d);font-weight:700"></span><br>🔄 アプリを開くたびにオンラインDB（新成分・法改正対応）と自動同期します。追加してほしい成分・修正はこのチャットに送るだけで即反映されます。
+  </footer>
+</div>
+
+<script>
+let DATA = [{"n": "ナイアシンアミド", "inci": "ナイアシンアミド", "alias": ["ニコチン酸アミド", "ビタミンB3", "ナイアシン", "にあしんあみど"], "cat": ["美白", "エイジングケア", "肌荒れ防止"], "eff": ["シミ・そばかすの原因となるメラニンの生成を抑制し、メラノソームの表皮細胞への受け渡しを阻害", "コラーゲン産生を促進し、シワ改善効果が認められている（医薬部外品有効成分）", "セラミド合成を促進し、肌のバリア機能を強化", "皮脂分泌の調整、毛穴の目立ち改善"], "saf": 1, "safNote": "刺激が少なく安全性は高い。高濃度（10%以上）ではまれに赤み・ピリつきが出る場合あり。敏感肌でも比較的使いやすい成分。", "reg": "医薬部外品の有効成分（シワ改善・美白）として承認実績あり。化粧品にも配合可能で配合上限の規制なし。旧指定成分には非該当。", "sim": ["トラネキサム酸", "ビタミンC誘導体", "アルブチン"]}, {"n": "ヒアルロン酸Na", "inci": "ヒアルロン酸Na", "alias": ["ヒアルロン酸ナトリウム", "HA", "ヒアルロン酸", "ひあるろんさん", "hyaluronic acid"], "cat": ["保湿"], "eff": ["1gで約6Lの水分を保持できる高い保水力で肌表面を保湿", "高分子タイプは肌表面に保護膜を形成", "低分子タイプは角質層への浸透性を高めた設計が可能"], "saf": 1, "safNote": "もともと体内に存在する成分で刺激・アレルギーリスクは極めて低い。全肌質に使用可能。", "reg": "化粧品成分として広く使用。配合上限の規制なし。旧指定成分には非該当。", "sim": ["コラーゲン", "セラミド", "グリセリン"]}, {"n": "レチノール", "inci": "レチノール", "alias": ["ビタミンA", "パルミチン酸レチノール（誘導体）", "れちのーる", "retinol", "ピュアレチノール"], "cat": ["エイジングケア", "美白"], "eff": ["線維芽細胞を活性化しコラーゲン・エラスチンの産生を促進", "ターンオーバーを促進し、シミ・くすみを改善", "ニキビ・毛穴改善にも有効"], "saf": 3, "safNote": "初期使用時に赤み・皮むけ・乾燥（A反応）が起こりやすい。紫外線で酸化しやすく夜用推奨。妊婦・授乳期は使用を避けるのが一般的。低濃度から段階的に慣らすこと。", "reg": "化粧品成分として配合可能（配合上限の明確な規制なし）。酸化防止剤の併用が品質保持の観点で重要。医薬部外品の有効成分としてはシワ改善用途でパルミチン酸レチノール等の誘導体が承認されている。", "sim": ["ナイアシンアミド", "バクチオール", "ビタミンC誘導体"]}, {"n": "ビタミンC誘導体", "inci": "リン酸アスコルビルMg / アスコルビルグルコシド 等", "alias": ["VC誘導体", "APPS", "AA2G", "ビタミンC", "アスコルビン酸", "びたみんC", "vitamin c"], "cat": ["美白", "エイジングケア", "毛穴ケア"], "eff": ["メラニン生成抑制と還元作用による美白効果", "抗酸化作用で皮脂の酸化・毛穴の黒ずみを予防", "コラーゲン合成の補酵素としてシワ・たるみ改善をサポート"], "saf": 2, "safNote": "純粋ビタミンC（アスコルビン酸）より安定で刺激も少ないが、高濃度では乾燥・ピリつきの可能性。水溶性/脂溶性/APPSで特性が異なる。", "reg": "化粧品成分として配合可能。リン酸アスコルビルMg等は医薬部外品の美白有効成分として承認実績あり。旧指定成分には非該当。", "sim": ["アルブチン", "トラネキサム酸", "ナイアシンアミド"]}, {"n": "グリチルリチン酸2K", "inci": "グリチルリチン酸ジカリウム", "alias": ["グリチルリチン酸ジカリウム", "甘草エキス由来", "グリチルリチン", "ぐりちるりちん", "甘草", "かんぞう"], "cat": ["肌荒れ防止", "抗炎症"], "eff": ["抗炎症作用により肌荒れ・ニキビ・赤みを鎮静", "敏感肌向け製品の基盤成分として広く使用", "頭皮の炎症・フケ抑制にも使用（シャンプー等）"], "saf": 1, "safNote": "刺激がほぼなく安全性は非常に高い。長期使用の蓄積リスクも化粧品濃度では問題視されていない。", "reg": "医薬部外品の有効成分（肌荒れ・ニキビ防止）として承認実績あり。化粧品にも配合可能。旧指定成分には非該当。", "sim": ["アラントイン", "ε-アミノカプロン酸", "カンゾウエキス"]}, {"n": "セラミド", "inci": "セラミドNP / AP / EOP 等", "alias": ["セレブロシド", "グルコシルセラミド", "せらみど", "ceramide", "ヒト型セラミド"], "cat": ["保湿", "エイジングケア"], "eff": ["角質層の細胞間脂質として水分の蒸散を防ぎバリア機能を維持", "乾燥による小ジワ・肌荒れを改善", "敏感肌・アトピー傾向肌の保湿ケアに有効"], "saf": 1, "safNote": "肌本来の成分で安全性は極めて高い。ヒト型セラミドは特に親和性が高い。", "reg": "化粧品成分として配合可能で規制なし。旧指定成分には非該当。", "sim": ["ヒアルロン酸Na", "スクワラン", "グリセリン"]}, {"n": "トラネキサム酸", "inci": "トラネキサム酸", "alias": ["トラネキサム酸（m-トラネキサム酸）", "とらねきさむさん", "トランサミン", "tranexamic acid"], "cat": ["美白", "肌荒れ防止", "抗炎症"], "eff": ["プラスミンを抑制しメラノサイトの活性化を防ぐ（肝斑ケアにも医薬品として使用）", "炎症性の赤み・肌荒れを鎮静", "美白と抗炎症の両方の効果を持つ"], "saf": 1, "safNote": "外用での刺激報告は少なく安全性は高い。内服（医薬品）では血栓リスクの注意があるが、化粧品での使用は問題視されていない。", "reg": "医薬部外品の美白有効成分として承認実績あり。化粧品にも配合可能。旧指定成分には非該当。", "sim": ["ナイアシンアミド", "アルブチン", "ビタミンC誘導体"]}, {"n": "アルブチン", "inci": "アルブチン", "alias": ["α-アルブチン", "β-アルブチン", "ハイドロキノン誘導体", "あるぶちん", "arbutin"], "cat": ["美白"], "eff": ["チロシナーゼの働きを阻害しメラニン生成を抑制", "ハイドロキノンより刺激が少なく安定性が高い", "α-アルブチンはβ型より約10倍の美白効果とされる"], "saf": 1, "safNote": "ハイドロキノンと比べ刺激は大幅に低い。光安定性がやや弱いため夜用またはUV対策併用が望ましい。", "reg": "医薬部外品の美白有効成分として承認実績あり（厚生労働省承認）。化粧品にも配合可能。旧指定成分には非該当。", "sim": ["ハイドロキノン", "ビタミンC誘導体", "コウジ酸"]}, {"n": "ハイドロキノン", "inci": "ハイドロキノン", "alias": ["HQ", "はいどろきのん", "hydroquinone"], "cat": ["美白"], "eff": ["チロシナーゼ阻害とメラノサイトへの直接作用で強力な美白効果", "できてしまったシミへの「還元」効果が期待できる"], "saf": 3, "safNote": "白斑（脱色）・刺激・赤みのリスクがあり高濃度（5%以上）では要指導。酸化しやすく品質管理が重要。使用中は必須のUV対策。", "reg": "2001年の規制緩和により化粧品への配合が可能（全成分表示義務あり）。配合上限の法的規制はないが、市販化粧品は一般的に1〜2%程度。旧指定成分には非該当。", "sim": ["アルブチン", "コウジ酸", "ビタミンC誘導体"]}, {"n": "コウジ酸", "inci": "コウジ酸", "alias": ["麹酸"], "cat": ["美白"], "eff": ["チロシナーゼの活性を阻害しメラニン生成を抑制", "抗酸化作用も併せ持つ"], "saf": 2, "safNote": "比較的安全だが、まれに接触皮膚炎の報告あり。酸化・変色しやすい性質。", "reg": "化粧品成分として配合可能。医薬部外品の美白有効成分としても承認実績あり。旧指定成分には非該当。", "sim": ["アルブチン", "ハイドロキノン", "ルシノール"]}, {"n": "グリセリン", "inci": "グリセリン", "alias": ["濃グリセリン", "グリセロール"], "cat": ["保湿"], "eff": ["角質層から水分を逃がさない吸湿性保湿", "あらゆる化粧品の基剤として使用", "低コストで安定した保湿効果"], "saf": 1, "safNote": "極めて安全性が高い。高濃度（純グリセリン）を直接塗布すると逆に水分を奪うことがあるが、化粧品濃度では問題なし。", "reg": "化粧品の基剤として広く使用。規制なし。旧指定成分には非該当。", "sim": ["ヒアルロン酸Na", "プロピレングリコール", "BG"]}, {"n": "スクワラン", "inci": "スクワラン", "alias": ["スクアラン", "すくわらん", "squalane"], "cat": ["保湿", "エイジングケア"], "eff": ["皮脂に近い組成で肌なじみが良く、エモリエント効果で柔軟な肌に", "酸化安定性が高く劣化しにくい", "ベタつかない軽い使用感"], "saf": 1, "safNote": "アレルギー・刺激報告はほぼない。酸化しにくく品質も安定。全肌質に使用可能。", "reg": "化粧品成分として広く使用。規制なし。旧指定成分には非該当。", "sim": ["ホホバ油", "ワセリン", "セラミド"]}, {"n": "ワセリン", "inci": "ワセリン", "alias": ["白色ワセリン", "ペトロラタム"], "cat": ["保湿"], "eff": ["肌表面に油膜を形成し水分蒸散を強力に防ぐ（密封効果）", "唇・乾燥部位の保護に最適"], "saf": 1, "safNote": "精製度の高い白色ワセリンは刺激ほぼなし。ベタつきが強いのが難点。ニキビができやすい肌は多量使用に注意。", "reg": "医薬品基剤・化粧品ともに使用実績豊富。規制なし。旧指定成分には非該当。", "sim": ["スクワラン", "ミネラルオイル", "シア脂"]}, {"n": "BG", "inci": "BG", "alias": ["1,3-ブチレングリコール", "ブチレングリコール"], "cat": ["保湿", "基剤"], "eff": ["保湿と抗菌性を併せ持つ多価アルコール", "防腐剤の量を減らす処方設計に寄与", "さっぱりした使用感"], "saf": 1, "safNote": "安全性は高い。PG（プロピレングリコール）より刺激が少なく、代替として多用される。", "reg": "化粧品の基剤として広く使用。規制なし。旧指定成分には非該当。", "sim": ["グリセリン", "DPG", "ペンチレングリコール"]}, {"n": "プロピレングリコール", "inci": "PG", "alias": ["PG", "プロパンジオール"], "cat": ["保湿", "基剤"], "eff": ["保湿・溶剤として処方の安定化に寄与", "有効成分の浸透補助"], "saf": 2, "safNote": "まれに接触皮膚炎・刺激の報告があり、敏感肌向けはBG等に置き換えるケースが多い。", "reg": "化粧品成分として配合可能。旧指定成分時代にアレルギー表示対象だった経緯あり（現在は旧指定成分制度は廃止・任意表示）。", "sim": ["BG", "グリセリン", "DPG"]}, {"n": "アラントイン", "inci": "アラントイン", "alias": [], "cat": ["肌荒れ防止", "抗炎症"], "eff": ["抗炎症・細胞賦活作用で肌荒れを鎮静", "カミソリ負け・ひび・あかぎれケアに使用"], "saf": 1, "safNote": "刺激がほぼなく安全性は非常に高い。", "reg": "医薬部外品の有効成分として承認実績あり。化粧品にも配合可能。旧指定成分には非該当。", "sim": ["グリチルリチン酸2K", "ε-アミノカプロン酸", "アズレン"]}, {"n": "サリチル酸", "inci": "サリチル酸", "alias": ["BHA", "さりちるさん"], "cat": ["ニキビケア", "角質ケア"], "eff": ["角質軟化・溶解作用で毛穴の詰まりを除去", "殺菌・抗炎症作用でニキビを改善", "ふけ・角質肥厚ケアにも"], "saf": 3, "safNote": "刺激が強めで、乾燥・ピリつき・皮むけが起こりやすい。敏感肌は低濃度から。他の角質ケア成分（レチノール・AHA）との併用は過度な刺激に注意。", "reg": "化粧品への配合上限は0.2%（化粧品基準）。医薬部外品（ニキビ・ふけ用途）では上限緩和あり。旧指定成分に該当していた経緯あり。", "sim": ["AHA（グリコール酸）", "レチノール", "アゼライン酸"]}, {"n": "グリコール酸", "inci": "グリコール酸", "alias": ["AHA", "アルファヒドロキシ酸", "ぐりこーるさん", "ピーリング"], "cat": ["角質ケア", "美白", "ニキビケア"], "eff": ["角質の結合を緩めピーリング効果でターンオーバー促進", "くすみ・ごわつき・毛穴改善", "低pHでの使用で効果が高まる"], "saf": 3, "safNote": "刺激・赤み・乾燥が起こりやすい。紫外線感受性が高まるため使用期間中はUV対策必須。高濃度は施術用。", "reg": "化粧品への配合は可能だが、品目によっては配合濃度・pHの届出（ケミカルピーリング関連）に注意。洗い流す製品と付け置き製品でリスク評価が異なる。", "sim": ["サリチル酸", "乳酸", "フルーツ酸"]}, {"n": "コラーゲン", "inci": "加水分解コラーゲン / 水溶性コラーゲン", "alias": ["加水分解コラーゲン", "マリンコラーゲン"], "cat": ["保湿", "エイジングケア"], "eff": ["肌表面で保湿膜を形成し潤いを保持", "加水分解（低分子）タイプは浸透性を向上", "ハリ・弾力感の演出"], "saf": 1, "safNote": "安全性は高い。肌内部のコラーゲンを直接増やす効果は限定的（主に保湿）。", "reg": "化粧品成分として広く使用。規制なし。旧指定成分には非該当。", "sim": ["ヒアルロン酸Na", "エラスチン", "セラミド"]}, {"n": "プラセンタエキス", "inci": "プラセンタエキス", "alias": ["豚プラセンタ", "馬プラセンタ", "プラセンタ", "ぷらせんた"], "cat": ["美白", "エイジングケア", "保湿"], "eff": ["美白（メラニン生成抑制）と肌荒れ防止の両効果で医薬部外品有効成分として承認", "アミノ酸・成長因子様物質を含み保湿・ハリ感向上"], "saf": 2, "safNote": "動物由来のため原料由来の品質差・感染症リスク管理が重要。アレルギー反応はまれ。", "reg": "医薬部外品の有効成分（美白・肌荒れ防止）として承認実績あり。原料規格（ブタ由来等）の適合が必要。", "sim": ["サイタイエキス", "コラーゲン", "トラネキサム酸"]}, {"n": "ビタミンE", "inci": "トコフェロール", "alias": ["トコフェロール", "酢酸トコフェロール"], "cat": ["エイジングケア", "抗酸化"], "eff": ["強い抗酸化作用で皮脂・他成分の酸化を防ぐ", "血行促進作用でくすみ・荒れ肌改善をサポート", "製品の酸化防止剤としても配合"], "saf": 1, "safNote": "安全性は高い。まれにアレルギー報告あり。", "reg": "化粧品成分として広く使用。規制なし。旧指定成分には非該当。", "sim": ["ビタミンC誘導体", "アスタキサンチン", "コエンザイムQ10"]}, {"n": "コエンザイムQ10", "inci": "ユビキノン", "alias": ["ユビキノン", "CoQ10", "きゅーてん"], "cat": ["エイジングケア", "抗酸化"], "eff": ["抗酸化作用で紫外線による酸化ストレスから肌を保護", "細胞のエネルギー産生をサポートしハリ・弾力ケア"], "saf": 1, "safNote": "刺激報告は少なく安全性は高い。油溶性で処方設計に注意。", "reg": "化粧品成分として配合可能。規制なし。旧指定成分には非該当。", "sim": ["ビタミンE", "アスタキサンチン", "フラーレン"]}, {"n": "フラーレン", "inci": "フラーレン", "alias": ["ふらーれん", "fullerene"], "cat": ["エイジングケア", "抗酸化", "美白"], "eff": ["ビタミンCの約170倍とされる強力な抗酸化力", "持続的に活性酸素を除去しシワ・シミ・毛穴にアプローチ", "紫外線下でも安定して働く"], "saf": 1, "safNote": "外用での刺激報告は少ない。水溶性/油溶性/リポソーム化など原料規格があり、ロゴマーク（R.S./L.F.等）が品質の目安。", "reg": "化粧品成分として配合可能。規制なし。旧指定成分には非該当。", "sim": ["アスタキサンチン", "コエンザイムQ10", "ビタミンC誘導体"]}, {"n": "アスタキサンチン", "inci": "アスタキサンチン", "alias": ["ヘマトコッカス藻由来"], "cat": ["エイジングケア", "抗酸化"], "eff": ["強力な抗酸化作用（ビタミンEの約500〜1000倍とされる）", "シワ・たるみ・くすみケア", "赤橙色の天然色素"], "saf": 1, "safNote": "安全性は高い。製品の色付きに影響する場合あり。", "reg": "化粧品成分として配合可能。規制なし。旧指定成分には非該当。", "sim": ["コエンザイムQ10", "ビタミンE", "フラーレン"]}, {"n": "ペプチド", "inci": "パルミチン酸トリペプチド-1 / アセチルヘキサペプチド-8 等", "alias": ["シグナルペプチド", "ボツリヌス様ペプチド"], "cat": ["エイジングケア"], "eff": ["コラーゲン・エラスチン産生のシグナルとして働きシワ・ハリ改善", "種類により表情ジワ緩和（ボトックス様作用）等の機能"], "saf": 1, "safNote": "刺激は少なく安全性は高い。成分により機能が大きく異なるため原料のエビデンス確認が重要。", "reg": "化粧品成分として配合可能。規制なし。旧指定成分には非該当。", "sim": ["レチノール", "ナイアシンアミド", "EGF様成分"]}, {"n": "バクチオール", "inci": "バクチオール", "alias": ["植物由来レチノール代替", "ばくちおーる", "bakuchiol"], "cat": ["エイジングケア", "ニキビケア"], "eff": ["レチノール様のコラーゲン促進・ターンオーバー整調作用", "抗炎症・抗菌作用でニキビケアにも", "光安定性が高く日中も使用可能"], "saf": 1, "safNote": "レチノールより刺激が大幅に少なく、敏感肌・妊婦への配慮からの代替成分として注目。ただしエビデンスの蓄積はレチノールより少ない。", "reg": "化粧品成分として配合可能。規制なし。旧指定成分には非該当。", "sim": ["レチノール", "ナイアシンアミド", "ペプチド"]}, {"n": "パラベン", "inci": "メチルパラベン / エチルパラベン 等", "alias": ["パラオキシ安息香酸エステル"], "cat": ["防腐剤"], "eff": ["広範な微生物に対する防腐・抗菌作用で製品を保護", "低濃度で効果を発揮し処方安定性が高い"], "saf": 2, "safNote": "長年の使用実績で安全性は確認されているが、まれにアレルギー報告あり。旧指定成分の経緯から「パラベンフリー」訴求が一般化している。内分泌攪乱の懸念は化粧品濃度では否定されている。", "reg": "化粧品への配合上限は合計1%（化粧品基準）。旧指定成分に該当（現在は制度廃止、全成分表示対象）。", "sim": ["フェノキシエタノール", "安息香酸Na", "ペンチレングリコール"]}, {"n": "フェノキシエタノール", "inci": "フェノキシエタノール", "alias": [], "cat": ["防腐剤"], "eff": ["防腐・抗菌作用で製品を微生物から保護", "パラベンフリー処方の代替として多用"], "saf": 2, "safNote": "化粧品濃度（1%以下）では安全性が確認されているが、まれに刺激・接触皮膚炎の報告あり。", "reg": "化粧品への配合上限は1%（化粧品基準）。旧指定成分には非該当。", "sim": ["パラベン", "安息香酸Na", "ペンチレングリコール"]}, {"n": "酸化亜鉛", "inci": "酸化亜鉛", "alias": ["ZnO"], "cat": ["UVケア", "肌荒れ防止"], "eff": ["紫外線散乱剤としてUVA・UVBを幅広く防御", "収れん・消炎作用でベビーパウダー・あせも対策にも"], "saf": 1, "safNote": "安全性は高い。白浮きしやすいのが難点。ナノ化タイプは透明性が向上。", "reg": "化粧品成分として配合可能。UV散乱剤として配合上限の規制なし（酸化チタンと併用が一般的）。旧指定成分には非該当。", "sim": ["酸化チタン", "カオリン", "タルク"]}, {"n": "酸化チタン", "inci": "酸化チタン", "alias": ["二酸化チタン", "TiO2"], "cat": ["UVケア", "基剤"], "eff": ["紫外線散乱剤（主にUVB）として日焼け止めに使用", "白色顔料としてファンデーションのカバー力にも寄与"], "saf": 1, "safNote": "皮膚刺激性はほぼない。ナノ粒子の吸入リスクはスプレー製品で注意喚起されるが、塗布では安全と評価されている。", "reg": "化粧品成分として配合可能。規制なし。旧指定成分には非該当。", "sim": ["酸化亜鉛", "タルク", "シリカ"]}, {"n": "エタノール", "inci": "エタノール", "alias": ["アルコール", "変性アルコール", "あるこーる"], "cat": ["基剤", "収れん"], "eff": ["溶剤・清涼感・収れん作用", "防腐補助・使用感のさっぱり化", "有効成分の浸透促進"], "saf": 2, "safNote": "乾燥肌・敏感肌では刺激・乾燥を感じる場合あり。「アルコールフリー」訴求製品が増加。揮発性で目にしみることがある。", "reg": "化粧品成分として広く使用。規制なし。旧指定成分には非該当。", "sim": ["変性アルコール", "イソプロパノール", "BG"]}, {"n": "シア脂", "inci": "シア脂", "alias": ["シアバター"], "cat": ["保湿", "エモリエント"], "eff": ["植物性油脂として高いエモリエント効果", "肌を柔らかく保ち乾燥から保護", "髪の保湿にも使用"], "saf": 1, "safNote": "安全性は高い。ナッツアレルギーとの関連が懸念されることがあるが、精製シア脂での反応報告は極めてまれ。", "reg": "化粧品成分として広く使用。規制なし。旧指定成分には非該当。", "sim": ["ホホバ油", "ワセリン", "ミツロウ"]}, {"n": "ホホバ油", "inci": "ホホバ種子油", "alias": ["ホホバオイル"], "cat": ["保湿", "エモリエント"], "eff": ["皮脂に近いワックスエステル構造で肌なじみが良い", "酸化しにくく安定", "頭皮・毛髪ケアにも"], "saf": 1, "safNote": "刺激報告はほぼなく安全性は高い。", "reg": "化粧品成分として広く使用。規制なし。旧指定成分には非該当。", "sim": ["スクワラン", "シア脂", "アルガン油"]}, {"n": "アルガン油", "inci": "アルガニアスピノサ核油", "alias": ["アルガンオイル"], "cat": ["保湿", "エモリエント", "エイジングケア"], "eff": ["オレイン酸・リノール酸・ビタミンEを含み高い保湿・抗酸化力", "髪のツヤ・まとまり改善（ヘアオイルとして人気）"], "saf": 1, "safNote": "安全性は高い。", "reg": "化粧品成分として広く使用。規制なし。旧指定成分には非該当。", "sim": ["ホホバ油", "オリーブ油", "シア脂"]}, {"n": "アゼライン酸", "inci": "アゼライン酸", "alias": ["あぜらいんさん", "azelaic acid"], "cat": ["ニキビケア", "美白"], "eff": ["抗菌作用でニキビ菌を抑制、角化異常を改善", "チロシナーゼ阻害による美白効果（炎症後色素沈着にも）", "皮脂分泌の抑制"], "saf": 2, "safNote": "初期にピリつき・乾燥が出ることがあるが、レチノールやBHAより穏やか。海外では医薬品としても使用。", "reg": "日本では化粧品成分として配合可能。規制なし。医薬部外品の有効成分としては未承認（2026年時点）。", "sim": ["サリチル酸", "レチノール", "ナイアシンアミド"]}, {"n": "EGF（ヒトオリゴペプチド-1）", "inci": "ヒトオリゴペプチド-1", "alias": ["EGF", "上皮成長因子"], "cat": ["エイジングケア"], "eff": ["表皮細胞の増殖シグナルとしてターンオーバーをサポート", "ハリ・キメの改善訴求に使用"], "saf": 2, "safNote": "化粧品濃度での刺激報告は少ないが、増殖因子の長期安全性エビデンスは限定的。原料の品質・濃度管理が重要。", "reg": "化粧品成分として配合可能（合成遺伝子組換ヒトオリゴペプチド-1）。規制なし。旧指定成分には非該当。", "sim": ["ペプチド", "FGF", "プラセンタエキス"]}, {"n": "カンゾウエキス", "inci": "カンゾウ根エキス / カンゾウ葉エキス", "alias": ["甘草エキス", "リコリス"], "cat": ["肌荒れ防止", "美白", "抗炎症"], "eff": ["グリチルリチン等を含み抗炎症作用", "カンゾウ葉エキスはポリフェノールによる美白・抗酸化"], "saf": 1, "safNote": "安全性は高い。", "reg": "化粧品成分として配合可能。規制なし。旧指定成分には非該当。", "sim": ["グリチルリチン酸2K", "アラントイン", "ドクダミエキス"]}, {"n": "ヨクイニンエキス", "inci": "ハトムギ種子エキス / ヨクイニンエキス", "alias": ["ハトムギ", "薏苡仁"], "cat": ["保湿", "肌荒れ防止", "角質ケア"], "eff": ["肌荒れ防止・保湿効果で伝統的に使用", "イボ・角質ケアの民間利用に由来"], "saf": 1, "safNote": "安全性は高い。", "reg": "化粧品成分として配合可能。ヨクイニン（ハトムギ）は医薬部外品の有効成分としても実績あり。", "sim": ["ドクダミエキス", "アロエエキス", "カンゾウエキス"]}, {"n": "ドクダミエキス", "inci": "ドクダミエキス", "alias": ["ドクダミ", "十薬"], "cat": ["肌荒れ防止", "抗炎症"], "eff": ["抗炎症・抗菌作用で肌荒れ・ニキビケア", "デトックス訴求の和漢成分"], "saf": 1, "safNote": "安全性は高い。", "reg": "化粧品成分として配合可能。規制なし。旧指定成分には非該当。", "sim": ["カンゾウエキス", "ヨクイニンエキス", "ツボクサエキス"]}, {"n": "ツボクサエキス", "inci": "ツボクサエキス", "alias": ["CICA", "シカ", "センテラアシアチカ", "しか", "センテラ"], "cat": ["肌荒れ防止", "抗炎症", "エイジングケア"], "eff": ["抗炎症・創傷治癒促進作用で肌荒れ・赤みを鎮静", "コラーゲン合成促進でハリ・シワケアにも", "「CICA」ブームの中核成分"], "saf": 1, "safNote": "安全性は高い。敏感肌向け製品に多用される。", "reg": "化粧品成分として配合可能。規制なし。旧指定成分には非該当。", "sim": ["ドクダミエキス", "カンゾウエキス", "アラントイン"]}, {"n": "アロエエキス", "inci": "アロエベラ葉エキス", "alias": ["アロエベラ"], "cat": ["保湿", "肌荒れ防止"], "eff": ["保湿・抗炎症で日焼け後の鎮静ケアに定番", "多糖体による保湿膜形成"], "saf": 1, "safNote": "安全性は高い。まれにアレルギー報告あり。", "reg": "化粧品成分として配合可能。規制なし。旧指定成分には非該当。", "sim": ["カンゾウエキス", "キュウリエキス", "ヒアルロン酸Na"]}, {"n": "ミネラルオイル", "inci": "ミネラルオイル", "alias": ["流動パラフィン"], "cat": ["保湿", "基剤", "エモリエント"], "eff": ["高いエモリエント効果で肌を保護", "酸化しにくく安定した基剤", "クレンジングオイルの基剤にも"], "saf": 1, "safNote": "精製度の高い化粧品グレードは安全性が高い。「鉱物油=悪」は誤解で、刺激はほぼない。", "reg": "化粧品成分として広く使用。規制なし。旧指定成分には非該当。", "sim": ["ワセリン", "スクワラン", "シリコーン"]}, {"n": "ジメチコン", "inci": "ジメチコン", "alias": ["シリコーン", "ジメチルポリシロキサン"], "cat": ["基剤", "エモリエント"], "eff": ["滑らかな使用感と被膜形成で肌を保護", "撥水性で汗・水に強い処方に寄与", "毛髪のすべり改善（コンディショナー等）"], "saf": 1, "safNote": "安全性は高い。「シリコン=悪」は根拠のないイメージで、皮膚刺激性はほぼない。ノンシリコンは消費者訴求上の選択肢。", "reg": "化粧品成分として広く使用。規制なし。旧指定成分には非該当。", "sim": ["シクロペンタシロキサン", "ミネラルオイル", "スクワラン"]}, {"n": "メトキシケイヒ酸エチルヘキシル", "inci": "メトキシケイヒ酸エチルヘキシル", "alias": ["OMC", "オクトクリレン類似"], "cat": ["UVケア"], "eff": ["UVB吸収剤として日焼け止めの主成分", "透明で白浮きしない"], "saf": 2, "safNote": "まれにアレルギー性接触皮膚炎の報告。環境（サンゴ礁）への影響が懸念され、一部地域（ハワイ等）で規制あり。", "reg": "日本では化粧品への配合上限10%（化粧品基準の紫外線吸収剤）。旧指定成分には非該当。", "sim": ["t-ブチルメトキシジベンゾイルメタン", "オクトクリレン", "酸化亜鉛"]}, {"n": "乳酸", "inci": "乳酸", "alias": ["AHAの一種"], "cat": ["角質ケア", "保湿"], "eff": ["AHAの一種で穏やかなピーリング作用", "天然保湿因子（NMF）の構成成分として保湿"], "saf": 2, "safNote": "グリコール酸より刺激は穏やかだが、高濃度では刺激あり。", "reg": "化粧品成分として配合可能。pH調整剤としても使用。規制なし。", "sim": ["グリコール酸", "クエン酸", "PCA-Na"]}, {"n": "PCA-Na", "inci": "PCA-Na", "alias": ["ピロリドンカルボン酸ナトリウム"], "cat": ["保湿"], "eff": ["天然保湿因子（NMF）の主成分で角質層の水分保持", "吸湿性が高くベタつかない保湿"], "saf": 1, "safNote": "安全性は高い。", "reg": "化粧品成分として配合可能。規制なし。旧指定成分には非該当。", "sim": ["乳酸", "アミノ酸類", "グリセリン"]}, {"n": "カフェイン", "inci": "カフェイン", "alias": [], "cat": ["エイジングケア", "引き締め"], "eff": ["血行促進・脂肪分解促進でむくみ・セルライトケア訴求", "抗酸化作用"], "saf": 1, "safNote": "外用での刺激はほぼない。", "reg": "化粧品成分として配合可能。規制なし。旧指定成分には非該当。", "sim": ["カプサイシン", "バニリルブチル", "トコフェロール"]}, {"n": "尿素", "inci": "尿素", "alias": ["ウレア"], "cat": ["保湿", "角質ケア"], "eff": ["NMFの構成成分として強い保湿力", "角質軟化作用でごわつき・ひび割れ改善"], "saf": 2, "safNote": "高濃度（10%以上）ではピリつき・刺激の可能性。傷口には刺激。", "reg": "化粧品成分として配合可能。医薬品（尿素クリーム等）では10〜20%。化粧品での規制なし。", "sim": ["PCA-Na", "乳酸", "グリセリン"]}, {"n": "パンテノール", "inci": "パンテノール", "alias": ["プロビタミンB5", "D-パンテノール"], "cat": ["保湿", "肌荒れ防止"], "eff": ["体内でパントテン酸（ビタミンB5）に変換され保湿・肌荒れ改善", "毛髪の保湿・ツヤ向上（シャンプーにも）"], "saf": 1, "safNote": "安全性は非常に高い。", "reg": "化粧品成分として配合可能。医薬部外品の有効成分としても実績あり。規制なし。", "sim": ["グリセリン", "アラントイン", "ヒアルロン酸Na"]}, {"n": "キシリトール", "inci": "キシリトール", "alias": [], "cat": ["保湿"], "eff": ["吸湿性による保湿", "歯磨きではむし歯予防成分として使用"], "saf": 1, "safNote": "安全性は高い。", "reg": "化粧品成分として配合可能。規制なし。旧指定成分には非該当。", "sim": ["グリセリン", "ソルビトール", "BG"]}, {"n": "セチルPGヒドロキシエチルパルミタミド", "inci": "セチルPGヒドロキシエチルパルミタミド", "alias": ["疑似セラミド"], "cat": ["保湿", "エイジングケア"], "eff": ["セラミド類似構造でバリア機能をサポート", "安定性が高く処方しやすい"], "saf": 1, "safNote": "安全性は高い。", "reg": "化粧品成分として配合可能。規制なし。旧指定成分には非該当。", "sim": ["セラミド", "スクワラン", "ヒアルロン酸Na"]}, {"n": "γ-ドコサラクトン", "inci": "γ-ドコサラクトン", "alias": ["エルカラクトン", "ガンマドコサラクトン", "えるからくとん", "elcalactone"], "cat": ["毛髪ケア"], "eff": ["ドライヤーやアイロンの熱に反応して毛髪タンパクと結合し、ダメージを補修", "ハリ・コシ・ツヤの向上、切れ毛・枝毛の予防", "毛髪の絡まりを減らし指通りを改善。シャンプー・トリートメント・ヘアオイルに多用"], "saf": 1, "safNote": "刺激報告はほぼなく安全性は高い。", "reg": "化粧品成分として配合可能。規制なし。旧指定成分には非該当。「エルカラクトン」は（株）精化の商品名。", "sim": ["ジラウロイルグルタミン酸リシンNa", "ヘマチン", "加水分解ケラチン"]}, {"n": "ポリクオタニウム-51", "inci": "ポリクオタニウム-51", "alias": ["リピジュア", "MPCポリマー", "lipidure", "りぴじゅあ"], "cat": ["保湿", "毛髪ケア"], "eff": ["細胞膜を模したMPCポリマーで高い生体親和性を持つ", "ヒアルロン酸の約2倍の保湿力とされ、洗い流しても肌に残る", "肌荒れ防止・バリアケアのほか人工涙液やコンタクトレンズにも応用"], "saf": 1, "safNote": "安全性は非常に高い。敏感肌向け製品にも多用。", "reg": "化粧品成分として配合可能。規制なし。旧指定成分には非該当。「リピジュア」は日油（株）の商品名。", "sim": ["ヒアルロン酸Na", "セラミド", "グリセリン"]}, {"n": "ジラウロイルグルタミン酸リシンNa", "inci": "ジラウロイルグルタミン酸リシンNa", "alias": ["ペリセア", "pellicer", "ぺりせあ"], "cat": ["毛髪ケア", "保湿"], "eff": ["毛髪内部に約1分で浸透しダメージを補修する高速浸透型成分", "キューティクルを整えツヤ・指通りを改善、カラーの褪色抑制", "肌では角質バリアを整える保湿成分としても使用"], "saf": 1, "safNote": "安全性は高い。アミノ酸系で肌なじみも良好。", "reg": "化粧品成分として配合可能。規制なし。旧指定成分には非該当。「ペリセア」は旭化成（株）の商品名。", "sim": ["γ-ドコサラクトン", "加水分解ケラチン", "ポリクオタニウム-51"]}, {"n": "ヘマチン", "inci": "ヘマチン", "alias": ["へまちん"], "cat": ["毛髪ケア", "エイジングケア"], "eff": ["毛髪ケラチンと結合しダメージを補修、カラー・パーマの持ちを向上", "メラニン産生のサポートで白髪ケア訴求にも使用", "抗酸化作用で頭皮環境を整える"], "saf": 1, "safNote": "安全性は高い。黒褐色の色素のため製品が着色することがある。", "reg": "化粧品成分として配合可能。規制なし。旧指定成分には非該当。", "sim": ["加水分解ケラチン", "γ-ドコサラクトン", "加水分解シルク"]}, {"n": "加水分解ケラチン", "inci": "加水分解ケラチン(羊毛) 等", "alias": ["ケラチン", "けらちん"], "cat": ["毛髪ケア", "保湿"], "eff": ["毛髪の主成分と同じタンパク質でダメージホールを補修", "ハリ・コシの向上、パサつき改善", "低分子タイプは内部浸透、高分子タイプは表面被膜"], "saf": 1, "safNote": "安全性は高い。羊毛由来が一般的。", "reg": "化粧品成分として配合可能。規制なし。旧指定成分には非該当。", "sim": ["ヘマチン", "加水分解シルク", "γ-ドコサラクトン"]}, {"n": "加水分解ヒアルロン酸", "inci": "加水分解ヒアルロン酸", "alias": ["ヒアロオリゴ", "低分子ヒアルロン酸", "ひあろおりご"], "cat": ["保湿"], "eff": ["分子量1万以下の超低分子タイプで角質層に浸透し内側から保湿", "洗い流しても肌に残る吸着性", "肌の柔軟性・ハリ感の向上"], "saf": 1, "safNote": "安全性は高い。", "reg": "化粧品成分として配合可能。規制なし。旧指定成分には非該当。「ヒアロオリゴ」は資生堂の商品名。", "sim": ["ヒアルロン酸Na", "ポリクオタニウム-51", "セラミド"]}, {"n": "(メタクリル酸グリセリルアミドエチル/メタクリル酸ステアリル)コポリマー", "inci": "(メタクリル酸グリセリルアミドエチル/メタクリル酸ステアリル)コポリマー", "alias": ["セラキュート", "セラキュートG", "ceracute", "せらきゅーと"], "cat": ["毛髪ケア", "エイジングケア"], "eff": ["セラミド類似構造を持つポリマーで毛髪・肌を補修", "傾いたキューティクルを整えツヤとまとまりを向上", "肌ではバリア機能のサポート"], "saf": 1, "safNote": "安全性は高い。", "reg": "化粧品成分として配合可能。規制なし。旧指定成分には非該当。「セラキュート」は日本精化（株）の商品名。", "sim": ["セラミド", "γ-ドコサラクトン", "ポリクオタニウム-51"]}, {"n": "γ-オリザノール", "inci": "γ-オリザノール", "alias": ["オリザノール", "おりざのーる", "米ぬか由来"], "cat": ["エイジングケア", "抗酸化", "UVケア"], "eff": ["抗酸化作用で肌の酸化ストレスを軽減", "血行促進作用でくすみケア", "紫外線吸収作用があり日焼け止め補助としても"], "saf": 1, "safNote": "安全性は高い。米ぬか・米胚芽由来の天然成分。", "reg": "化粧品成分として配合可能。規制なし。旧指定成分には非該当。", "sim": ["ビタミンE", "コエンザイムQ10", "アスタキサンチン"]}, {"n": "l-メントール", "inci": "l-メントール", "alias": ["メントール", "ハッカ", "薄荷", "めんそーる"], "cat": ["収れん", "肌荒れ防止"], "eff": ["清涼感を与え、かゆみ・ほてりを鎮静", "血行促進作用（頭皮ケアにも多用）", "抗菌作用"], "saf": 2, "safNote": "敏感肌では刺激を感じることがある。目の周りは避ける。", "reg": "化粧品成分として配合可能。医薬部外品の有効成分（かゆみ止め等）としても実績あり。旧指定成分には非該当。", "sim": ["ハッカ油", "カンフル", "サリチル酸メチル"]}];
+</script>
+<script>
+/* ===== オンラインDB自動更新（正本：AI Drive上の seibun_db.json） ===== */
+const REMOTE_DB_URL = 'https://www.genspark.ai/api/files/s/SVxewbeL';
+const DB_TS_KEY = 'seibun_db_ts';
+async function refreshDB(){
+  try{
+    const r = await fetch(REMOTE_DB_URL, {cache:'no-store'});
+    if(!r.ok) return;
+    const d = await r.json();
+    if(Array.isArray(d) && d.length >= DATA.length){
+      const builtin = DATA.slice();
+      DATA = d;
+      try{ localStorage.setItem('seibun_db_remote', JSON.stringify(d)); }catch(e){}
+      try{ localStorage.setItem(DB_TS_KEY, String(Date.now())); }catch(e){}
+      const hint = document.querySelector('#hint');
+      if(d.length > builtin.length){
+        const added = d.length - builtin.length;
+        const el = document.createElement('div');
+        el.className = 'hint';
+        el.style.color = 'var(--teal-d)';
+        el.style.fontWeight = '700';
+        el.textContent = '🔄 オンラインDBを更新しました（+' + added + '成分）';
+        hint && hint.parentNode.insertBefore(el, hint.nextSibling);
+      }
+      if(typeof renderCats === 'function') renderCats();
+      if(typeof render === 'function') render();
+      updateDbStamp();
+    }
+  }catch(e){ /* オフライン時は内蔵DBのまま */ }
+}
+function updateDbStamp(){
+  const ts = localStorage.getItem(DB_TS_KEY);
+  const el = document.querySelector('#dbStamp');
+  if(el) el.textContent = ts ? 'DB最終同期：' + new Date(+ts).toLocaleString('ja-JP') : 'DB：内蔵版（未同期）';
+}
+(function(){
+  try{
+    const cached = localStorage.getItem('seibun_db_remote');
+    if(cached){
+      const d = JSON.parse(cached);
+      if(Array.isArray(d) && d.length > 0) DATA = d;
+    }
+  }catch(e){}
+})();
+</script>
+<script>
+const $ = s => document.querySelector(s);
+const histKey = 'seibun_hist';
+
+function meter(lv){
+  const cls = lv<=2 ? '' : (lv===3 ? 'warn' : 'danger');
+  let dots='';
+  for(let i=1;i<=5;i++) dots += `<span class="dot ${i<=lv?'on '+cls:''}"></span>`;
+  const labels={1:'低リスク',2:'やや低',3:'注意',4:'やや高',5:'高リスク'};
+  return `<div class="meter">${dots}<span class="meter-label" style="color:${lv<=2?'var(--ok)':lv===3?'var(--warn)':'var(--danger)'}">${labels[lv]}</span></div>`;
+}
+
+function cardHTML(d, open=false){
+  const sim = d.sim.map(s=>`<button class="sim-chip" onclick="searchFor('${s}')">${s}</button>`).join('');
+  return `
+  <div class="card">
+    <div class="card-head" onclick="this.parentElement.querySelectorAll('details').forEach(t=>{})">
+      <div class="cname">${d.n} <span class="badge">DB収録</span></div>
+      <div class="inci">表示名称（INCI）：${d.inci}${d.alias.length? ' ／ 別名：'+d.alias.join('、'):''}</div>
+      <div class="cats">${d.cat.map(c=>`<span class="cat">${c}</span>`).join('')}</div>
+      <div class="eff-quick">✨ ${d.eff.slice(0,3).join('・')}</div>
+    </div>
+    <details ${open?'open':''}>
+      <summary>✨ 効果・効能 <span class="arrow">▼</span></summary>
+      <div class="sec-body"><ul>${d.eff.map(e=>`<li>${e}</li>`).join('')}</ul></div>
+    </details>
+    <details>
+      <summary>⚠️ 安全性・副作用リスク <span class="arrow">▼</span></summary>
+      <div class="sec-body">${meter(d.saf)}<p>${d.safNote}</p></div>
+    </details>
+    <details>
+      <summary>⚖️ 法的規制（日本） <span class="arrow">▼</span></summary>
+      <div class="sec-body"><div class="reg-box">${d.reg}</div></div>
+    </details>
+    <details>
+      <summary>🔄 類似成分・代替成分 <span class="arrow">▼</span></summary>
+      <div class="sec-body"><div class="sim-row">${sim}</div></div>
+    </details>
+  </div>`;
+}
+
+let currentCat = 'すべて';
+
+function norm(s){
+  if(!s) return '';
+  s = (''+s).toLowerCase();
+  s = s.replace(/[\u30A1-\u30F6]/g, ch => String.fromCharCode(ch.charCodeAt(0)-0x60));
+  s = s.replace(/γ|gamma|ガンマ/g,'がんま')
+       .replace(/α|alpha|アルファ/g,'あるふぁ')
+       .replace(/β|beta|ベータ/g,'べーた')
+       .replace(/δ|delta|デルタ/g,'でるた')
+       .replace(/ε|epsilon/g,'いぷしろん')
+       .replace(/l-|d-/g,'');
+  return s.replace(/[\s\-‐‑−―・=＝\/()（）,、.。　]/g,'');
+}
+
+function scoreOf(d, qk){
+  const n = norm(d.n), inci = norm(d.inci), als = d.alias.map(norm), eff = norm(d.eff.join(''));
+  if(n === qk) return 100;
+  if(als.some(a => a === qk)) return 95;
+  if(n.startsWith(qk) || als.some(a => a.startsWith(qk))) return 80;
+  if(n.includes(qk)) return 70;
+  if(als.some(a => a.includes(qk))) return 65;
+  if(inci.includes(qk)) return 60;
+  if(eff.includes(qk)) return 20;
+  return 0;
+}
+
+function render(){
+  const q = $('#q').value.trim();
+  const qk = norm(q);
+  let list;
+  const byCat = d => currentCat==='すべて' || d.cat.includes(currentCat);
+  if(!qk){
+    list = DATA.filter(byCat);
+  }else{
+    list = DATA.filter(byCat).map(d=>({d, s:scoreOf(d,qk)}))
+      .filter(x=>x.s>0).sort((a,b)=>b.s-a.s).map(x=>x.d);
+  }
+  $('#hint').textContent = qk ? `「${q}」の検索結果：${list.length}件（関連度順）` : `収録 ${DATA.length} 成分から検索できます（通称・商品名・ひらがな・英名OK）`;
+  if(!list.length){
+    $('#results').innerHTML = qk ? `<div class="empty"><div class="big">🔍</div>内蔵DBに「${q}」はありません。<br><button class="web-btn" onclick="webSearch()">🌐 ネットで「${q}」をリアルタイム検索</button></div>` : '';
+  }else{
+    $('#results').innerHTML = list.map((d,i)=>cardHTML(d, list.length===1)).join('') + (qk ? `<div style="text-align:center;margin:6px 0 14px"><button class="web-btn" onclick="webSearch()">🌐 「${q}」をネットでも検索</button></div>` : '');
+    if(list.length===1) addHist(list[0].n);
+  }
+  renderHist();
+}
+
+function renderCats(){
+  const cats = ['すべて', ...new Set(DATA.flatMap(d=>d.cat))];
+  $('#catChips').innerHTML = cats.map(c=>`<button class="chip ${c===currentCat?'active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
+}
+function setCat(c){ currentCat=c; renderCats(); render(); updateDbStamp(); refreshDB(); }
+
+function searchFor(name){ $('#q').value=name; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+
+function addHist(n){
+  let h = JSON.parse(localStorage.getItem(histKey)||'[]');
+  h = [n, ...h.filter(x=>x!==n)].slice(0,8);
+  localStorage.setItem(histKey, JSON.stringify(h));
+}
+function renderHist(){
+  const h = JSON.parse(localStorage.getItem(histKey)||'[]');
+  $('#histArea').innerHTML = h.length ? `<div class="hist-title">🕘 最近チェックした成分</div><div class="hist-row">${h.map(n=>`<button class="sim-chip" onclick="searchFor('${n}')">${n}</button>`).join('')}</div>` : '';
+}
+
+async function webSearch(){
+  const q = $('#q').value.trim();
+  if(!q) return;
+  const box = $('#results');
+  box.innerHTML = '<div class="empty"><div class="big">⏳</div>ネットで「'+q+'」を検索中...</div>';
+  window.scrollTo({top:0,behavior:'smooth'});
+  const queries = [q + ' 成分 化粧品', q];
+  try{
+    let pages = [];
+    for(const gq of queries){
+      const url = 'https://ja.wikipedia.org/w/api.php?action=query&prop=extracts|info&exintro&explaintext&inprop=url&redirects=1&format=json&origin=*&generator=search&gsrsearch=' + encodeURIComponent(gq) + '&gsrlimit=5';
+      const r = await fetch(url);
+      const j = await r.json();
+      pages = (j.query && j.query.pages) ? Object.values(j.query.pages) : [];
+      if(pages.length) break;
+    }
+    if(!pages.length){
+      box.innerHTML = '<div class="empty"><div class="big">😕</div>ネットでも「'+q+'」は見つかりませんでした。<br>表記を変えて試してください。</div>';
+      return;
+    }
+    box.innerHTML = '<div class="hist-title">🌐 ネット検索結果（Wikipediaより・リアルタイム取得）</div>' + pages.map(p=>`
+      <div class="card"><div class="card-head">
+        <div class="cname" style="font-size:17px">${p.title} <span class="badge web-badge">ネット検索</span></div>
+        <div style="margin-top:8px;font-size:14px">${(p.extract||'（概要なし）').slice(0,300)}${(p.extract||'').length>300?'…':''}</div>
+        <a class="web-link" href="${p.fullurl}" target="_blank" rel="noopener">Wikipediaで詳しく読む →</a>
+      </div></div>`).join('');
+  }catch(e){
+    box.innerHTML = '<div class="empty"><div class="big">⚠️</div>通信エラーです。ネット接続を確認してもう一度お試しください。</div>';
+  }
+}
+
+$('#q').addEventListener('input', render);
+$('#clearBtn').addEventListener('click', ()=>{ $('#q').value=''; render(); $('#q').focus(); });
+
+$('#dbCount').textContent = DATA.length;
+renderCats(); render(); updateDbStamp(); refreshDB();
+</script>
+</body>
+</html>
